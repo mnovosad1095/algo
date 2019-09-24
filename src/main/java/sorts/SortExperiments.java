@@ -4,39 +4,62 @@ import java.io.PrintWriter;
 import java.util.Random;
 
 
-public class Main {
+public class SortExperiments {
 
-    public static void main(String[] args){
-        try {
-            PrintWriter fileWriter =new PrintWriter(new BufferedWriter(new FileWriter("./results.txt")));
+    private PrintWriter fileWriter;
 
-            experiment1(fileWriter);
-            fileWriter.print("\n");
-            experiment2(fileWriter);
-            fileWriter.print("\n");
-            experiment3(fileWriter);
-            fileWriter.print("\n");
-            experiment4(fileWriter);
-            fileWriter.close();
-        } catch (Exception e) { System.out.println(e); }
+    public void main(String[] args){
+        createFileWriter();
+        doExperiment("Random Array");
+        doExperiment("Sorted Array");
+        doExperiment("Descending Array");
+        doExperiment("Array with same numbers");
+        closeFile();
     }
 
-    private static void experiment1(PrintWriter fileWriter){
-        long[][] allTimeRecords = new long[3][11];
-        long[][] allComparisonsArray = new long[3][11];
+    private void createFileWriter() {
+        try {
+            fileWriter = new PrintWriter(new BufferedWriter(new FileWriter("./results.txt")));
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+    }
+
+    private void closeFile() {
+        fileWriter.close();
+    }
+
+    private void doExperiment(String experiment) {
+
+        if (experiment.equals("Random Array")) {
+            randomArraySort();
+        } else if(experiment.equals("Sorted Array")) {
+            sortSortedArray();
+        } else if (experiment.equals("Descending Array")) {
+            sortDescendingOrderArray();
+        } else if (experiment.equals("Array with same numbers")) {
+            sortSameNumbersArray();
+        } else {
+            System.out.println("No such experiment");
+        }
+    }
+
+    private void randomArraySort(){
+        long[][] timeRecords = new long[3][11];
+        long[][] comparisons = new long[3][11];
         long started = System.nanoTime();
 
         for (int i = 7; i < 18; i++){
             int n = (int) Math.pow(2, (double) i);
             int[] array = new int[n];
             randomizeArray(array, 1);
-            doRandomSorts(allTimeRecords, allComparisonsArray, array, i);
+            doRandomSorts(timeRecords, comparisons, array, i);
         }
-        writeResults(allTimeRecords, allComparisonsArray, fileWriter);
+        writeResults(timeRecords, comparisons);
         System.out.println(System.nanoTime() - started);
     }
 
-    private static void experiment2(PrintWriter fileWriter){
+    private void sortSortedArray(){
         long[][] timeRecords = new long[3][11];
         long[][] comparisonsCounter = new long[3][11];
         long started = System.nanoTime();
@@ -49,11 +72,11 @@ public class Main {
             }
             doSorts(array, i, timeRecords, comparisonsCounter);
         }
-        writeResults(timeRecords, comparisonsCounter, fileWriter);
+        writeResults(timeRecords, comparisonsCounter);
         System.out.println(System.nanoTime() - started);
     }
 
-    private static void experiment3(PrintWriter fileWriter){
+    private void sortDescendingOrderArray(){
         long[][] timeRecords = new long[3][11];
         long[][] comparisonsCounter = new long[3][11];
         long started = System.nanoTime();
@@ -66,21 +89,21 @@ public class Main {
             }
             doSorts(array, i, timeRecords, comparisonsCounter);
         }
-        writeResults(timeRecords, comparisonsCounter, fileWriter);
+        writeResults(timeRecords, comparisonsCounter);
         System.out.println(System.nanoTime() - started);
     }
 
-    private static void experiment4(PrintWriter fileWriter){
-        long[][] allTimeRecords = new long[3][11];
-        long[][] allComparisonsArray = new long[3][11];
+    private  void sortSameNumbersArray(){
+        long[][] timeRecords = new long[3][11];
+        long[][] comparisons = new long[3][11];
 
         for (int i = 7; i < 18; i++){
             int n = (int) Math.pow(2, (double) i);
             int[] arr = new int[n];
             randomizeArray(arr, 4);
-            doRandomSorts(allTimeRecords, allComparisonsArray, arr, i);
+            doRandomSorts(timeRecords, comparisons, arr, i);
         }
-        writeResults(allTimeRecords, allComparisonsArray, fileWriter);
+        writeResults(timeRecords, comparisons);
     }
 
     private static void doSorts(int[] array, int index, long[][] timeRecords, long[][] comparisonsCounter){
@@ -96,33 +119,33 @@ public class Main {
         timeRecords[2][index - 7] = System.nanoTime() - start;
     }
 
-    private static void doRandomSorts(long[][] allTimeRecords, long[][] allComparisonsArray, int[] array, int i){
-        long[] comparisonsArr = new long[10];
-        long[] timeRecords = new long[10];
+    private static void doRandomSorts(long[][] globalTimeRecords, long[][] globalComparisonsArray, int[] array, int i) {
+        long[] localComparisonsArr = new long[10];
+        long[] localTimeRecords = new long[10];
 
         for (int j = 0; j < 10; j++) {
             long startTime = System.nanoTime();
-            comparisonsArr[j] = shellSort(array.clone());
-            timeRecords[j] =(System.nanoTime() - startTime);
+            localComparisonsArr[j] = shellSort(array.clone());
+            localTimeRecords[j] =(System.nanoTime() - startTime);
         }
-        allComparisonsArray[0][i-7] = getAverage(comparisonsArr);
-        allTimeRecords[0][i-7] = getAverage(timeRecords);
+        globalComparisonsArray[0][i-7] = getAverage(localComparisonsArr);
+        globalTimeRecords[0][i-7] = getAverage(localTimeRecords);
 
         for (int j = 0; j < 10; j++) {
             long startTime = System.nanoTime();
-            comparisonsArr[j] = insertionSort(array.clone());
-            timeRecords[j] =(System.nanoTime() - startTime);
+            localComparisonsArr[j] = insertionSort(array.clone());
+            localTimeRecords[j] =(System.nanoTime() - startTime);
         }
-        allComparisonsArray[1][i-7] = getAverage(comparisonsArr);
-        allTimeRecords[1][i-7] = getAverage(timeRecords);
+        globalComparisonsArray[1][i-7] = getAverage(localComparisonsArr);
+        globalTimeRecords[1][i-7] = getAverage(localTimeRecords);
 
         for (int j = 0; j < 10; j++) {
             long startTime = System.nanoTime();
-            comparisonsArr[j] = selectionSort(array.clone());
-            timeRecords[j] =(System.nanoTime() - startTime);
+            localComparisonsArr[j] = selectionSort(array.clone());
+            localTimeRecords[j] =(System.nanoTime() - startTime);
         }
-        allComparisonsArray[2][i-7] = getAverage(comparisonsArr);
-        allTimeRecords[2][i-7] = getAverage(timeRecords);
+        globalComparisonsArray[2][i-7] = getAverage(localComparisonsArr);
+        globalTimeRecords[2][i-7] = getAverage(localTimeRecords);
     }
 
     private static long insertionSort(int[] array){
@@ -209,7 +232,7 @@ public class Main {
         return sum/array.length;
     }
 
-    private static void writeResults(long[][] timeRes, long[][] comparisonRes, PrintWriter fileWriter){
+    private void writeResults(long[][] timeRes, long[][] comparisonRes) {
         fileWriter.println("Time:");
         writeArr(timeRes, fileWriter);
         fileWriter.println("Comparisons:");
