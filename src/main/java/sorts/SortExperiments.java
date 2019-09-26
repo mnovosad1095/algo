@@ -1,3 +1,5 @@
+package sorts;
+
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.PrintWriter;
@@ -8,7 +10,7 @@ public class SortExperiments {
 
     private PrintWriter fileWriter;
 
-    public void main(String[] args){
+    public void makeExperiments(){
         createFileWriter();
         doExperiment("Random Array");
         doExperiment("Sorted Array");
@@ -194,6 +196,7 @@ public class SortExperiments {
             for (int i = gap; i < n; i++) {
                 int temp = array[i];
                 int j = i;
+                comparisonCounter++;
                 while (j >= gap && array[j - gap] > temp) {
                     comparisonCounter++;
                     array[j] = array[j - gap];
@@ -234,19 +237,26 @@ public class SortExperiments {
 
     private void writeResults(long[][] timeRes, long[][] comparisonRes) {
         fileWriter.println("Time:");
-        writeArr(timeRes, fileWriter);
+        writeArr(timeRes, fileWriter, 1);
         fileWriter.println("Comparisons:");
-        writeArr(comparisonRes, fileWriter);
+        writeArr(comparisonRes, fileWriter, 0);
+        fileWriter.println();
     }
 
-    private static void writeArr(long[][] array, PrintWriter fileWriter){
+    private static void writeArr(long[][] array, PrintWriter fileWriter, int type){
 
         try {
             String[] sorts = {"Shell", "Insertion", "Selection"};
             for (int i = 0; i < 3; i++){
                 fileWriter.print(sorts[i] + ":\t");
                 for (int j = 0; j < array[i].length; j++){
-                    fileWriter.print(array[i][j] + " ");
+                    if (type == 1){
+                        double num = array[i][j] / Math.pow(10, 9);
+                        String strNum = String.format("%.10f",num);
+                        fileWriter.print( strNum + " ");
+                    } else {
+                        fileWriter.print(array[i][j] + " ");
+                    }
                 }
                 fileWriter.print("\n");
             }
